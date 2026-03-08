@@ -5,131 +5,138 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
-# Page config
+# ---------------------------
+# PAGE CONFIG
+# ---------------------------
+
 st.set_page_config(
     page_title="TravelMate AI",
     page_icon="✈️",
     layout="wide"
 )
 
-# Animated gradient background
+# ---------------------------
+# ANIMATED GRADIENT BACKGROUND
+# ---------------------------
+
 st.markdown("""
 <style>
 
-.stApp{
-background: linear-gradient(
-135deg,
-#00c6ff,
-#0072ff,
-#4facfe,
-#43e97b,
-#38f9d7,
-#fddb92
-);
+[data-testid="stAppViewContainer"]{
+background: linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb,#a6c1ee,#a1c4fd,#c2e9fb);
 background-size: 400% 400%;
-animation: gradientBG 12s ease infinite;
+animation: gradientBG 15s ease infinite;
 }
 
-@keyframes gradientBG {
-0% {background-position:0% 50%;}
-50% {background-position:100% 50%;}
-100% {background-position:0% 50%;}
+@keyframes gradientBG{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
 }
 
-/* glass container */
-
-.block-container{
-background: rgba(255,255,255,0.9);
-padding:2rem;
-border-radius:15px;
-box-shadow:0px 8px 20px rgba(0,0,0,0.15);
-}
-
-/* title */
-
-.title{
+.main-title{
 text-align:center;
-font-size:55px;
-font-weight:700;
-color:#0b3d91;
-font-family:Trebuchet MS;
+font-size:60px;
+font-weight:800;
+color:#1a1a1a;
 }
 
-.subtitle{
+.sub-title{
 text-align:center;
 font-size:20px;
-margin-bottom:25px;
+margin-bottom:40px;
 }
 
-/* answer box */
-
-.answer-box{
+.feature-card{
 background:white;
-padding:25px;
+padding:20px;
 border-radius:15px;
-box-shadow:0px 6px 18px rgba(0,0,0,0.2);
-font-size:18px;
+text-align:center;
+box-shadow:0px 4px 15px rgba(0,0,0,0.2);
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# Header
+# ---------------------------
+# HEADER
+# ---------------------------
+
 st.markdown(
 """
-<div class="title">✈️ TravelMate AI</div>
-<div class="subtitle">
+<div class="main-title">✈️ TravelMate AI</div>
+<div class="sub-title">
 Discover destinations • Explore food • Plan your journey 🌍
 </div>
 """,
 unsafe_allow_html=True
 )
 
-# Feature icons row
+# ---------------------------
+# FEATURE SECTION
+# ---------------------------
+
 col1,col2,col3,col4 = st.columns(4)
 
 with col1:
-    st.markdown("### 🏝 Destinations")
+    st.markdown(
+    """
+    <div class="feature-card">
+    🏝️ <h3>Destinations</h3>
+    Discover tourist attractions
+    </div>
+    """,unsafe_allow_html=True)
 
 with col2:
-    st.markdown("### 🍜 Food")
+    st.markdown(
+    """
+    <div class="feature-card">
+    🍜 <h3>Food</h3>
+    Explore local cuisines
+    </div>
+    """,unsafe_allow_html=True)
 
 with col3:
-    st.markdown("### 🏨 Hotels")
+    st.markdown(
+    """
+    <div class="feature-card">
+    🏨 <h3>Hotels</h3>
+    Find places to stay
+    </div>
+    """,unsafe_allow_html=True)
 
 with col4:
-    st.markdown("### 🗺 Travel Guides")
+    st.markdown(
+    """
+    <div class="feature-card">
+    📚 <h3>Travel Guides</h3>
+    Upload travel PDFs
+    </div>
+    """,unsafe_allow_html=True)
 
-# Sidebar
-with st.sidebar:
+st.write("")
+st.write("")
 
-    st.image("https://cdn-icons-png.flaticon.com/512/201/201623.png", width=90)
+# ---------------------------
+# LOAD GROQ API FROM SECRETS
+# ---------------------------
 
-    st.title("Travel AI")
+api_key = st.secrets["GROQ_API_KEY"]
 
-    st.write("Your smart travel companion ✈️")
+# ---------------------------
+# PDF UPLOAD
+# ---------------------------
 
-    st.markdown("---")
+uploaded_file = st.file_uploader(
+"📄 Upload Travel Guide PDF",
+type="pdf"
+)
 
-    st.write("✨ Features")
+# ---------------------------
+# RAG PIPELINE
+# ---------------------------
 
-    st.write("✔ Upload travel guide PDFs")
-
-    st.write("✔ Ask travel questions")
-
-    st.write("✔ AI answers using RAG")
-
-    st.write("✔ Smart document search")
-
-# Inputs
-api_key = st.text_input("🔑 Enter Groq API Key", type="password")
-
-uploaded_file = st.file_uploader("📄 Upload Travel Guide PDF", type="pdf")
-
-query = st.text_input("💬 Ask a travel question")
-
-# RAG logic
-if uploaded_file and api_key and query:
+if uploaded_file:
 
     with open("temp.pdf","wb") as f:
         f.write(uploaded_file.read())
@@ -158,29 +165,30 @@ if uploaded_file and api_key and query:
         temperature=0.7
     )
 
-    docs = retriever.invoke(query)
+    st.success("✅ Travel guide loaded successfully!")
 
-    context = "\n".join([d.page_content for d in docs])
+    query = st.text_input("💬 Ask a travel question")
 
-    response = llm.invoke(
+    if query:
+
+        docs = retriever.invoke(query)
+
+        context = "\n".join([d.page_content for d in docs])
+
+        response = llm.invoke(
         f"""
-Use the context below to answer the travel question.
+        You are a travel assistant.
 
-Context:
-{context}
+        Use the context below to answer clearly and attractively.
 
-Question:
-{query}
-"""
-    )
+        Context:
+        {context}
 
-    st.markdown("### 🤖 Travel AI Answer")
+        Question:
+        {query}
+        """
+        )
 
-    st.markdown(
-        f"""
-        <div class="answer-box">
-        {response.content}
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        st.markdown("###  AI Travel Answer")
+
+        st.success(response.content)
