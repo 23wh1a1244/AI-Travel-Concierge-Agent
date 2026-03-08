@@ -5,7 +5,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
-# Page settings
+# Page config
 st.set_page_config(
     page_title="TravelMate AI",
     page_icon="✈️",
@@ -16,10 +16,18 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-body {
-    background: linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb,#a6c1ee,#a1c4fd,#c2e9fb);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
+.stApp{
+background: linear-gradient(
+135deg,
+#00c6ff,
+#0072ff,
+#4facfe,
+#43e97b,
+#38f9d7,
+#fddb92
+);
+background-size: 400% 400%;
+animation: gradientBG 12s ease infinite;
 }
 
 @keyframes gradientBG {
@@ -28,20 +36,21 @@ body {
 100% {background-position:0% 50%;}
 }
 
-.stApp{
-background: transparent;
-}
+/* glass container */
 
 .block-container{
 background: rgba(255,255,255,0.9);
-padding: 2rem;
-border-radius: 15px;
-box-shadow: 0px 8px 25px rgba(0,0,0,0.15);
+padding:2rem;
+border-radius:15px;
+box-shadow:0px 8px 20px rgba(0,0,0,0.15);
 }
 
-h1{
+/* title */
+
+.title{
 text-align:center;
 font-size:55px;
+font-weight:700;
 color:#0b3d91;
 font-family:Trebuchet MS;
 }
@@ -49,15 +58,16 @@ font-family:Trebuchet MS;
 .subtitle{
 text-align:center;
 font-size:20px;
-color:#444;
-margin-bottom:30px;
+margin-bottom:25px;
 }
+
+/* answer box */
 
 .answer-box{
 background:white;
 padding:25px;
 border-radius:15px;
-box-shadow:0px 6px 20px rgba(0,0,0,0.2);
+box-shadow:0px 6px 18px rgba(0,0,0,0.2);
 font-size:18px;
 }
 
@@ -65,14 +75,17 @@ font-size:18px;
 """, unsafe_allow_html=True)
 
 # Header
-st.markdown("""
-<h1>✈️ TravelMate AI</h1>
-<p class="subtitle">
+st.markdown(
+"""
+<div class="title">✈️ TravelMate AI</div>
+<div class="subtitle">
 Discover destinations • Explore food • Plan your journey 🌍
-</p>
-""", unsafe_allow_html=True)
+</div>
+""",
+unsafe_allow_html=True
+)
 
-# Feature icons
+# Feature icons row
 col1,col2,col3,col4 = st.columns(4)
 
 with col1:
@@ -122,7 +135,6 @@ if uploaded_file and api_key and query:
         f.write(uploaded_file.read())
 
     loader = PyPDFLoader("temp.pdf")
-
     docs = loader.load()
 
     splitter = RecursiveCharacterTextSplitter(
@@ -152,17 +164,17 @@ if uploaded_file and api_key and query:
 
     response = llm.invoke(
         f"""
-        Use the context below to answer the travel question.
+Use the context below to answer the travel question.
 
-        Context:
-        {context}
+Context:
+{context}
 
-        Question:
-        {query}
-        """
+Question:
+{query}
+"""
     )
 
-    st.markdown("### Travel AI Answer")
+    st.markdown("### 🤖 Travel AI Answer")
 
     st.markdown(
         f"""
