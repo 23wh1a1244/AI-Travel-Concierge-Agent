@@ -7,30 +7,58 @@ from langchain_community.vectorstores import FAISS
 
 # Page settings
 st.set_page_config(
-    page_title="AI Travel Concierge",
-    page_icon="🌍",
-    layout="centered"
+    page_title="TravelMate AI",
+    page_icon="✈️",
+    layout="wide"
 )
 
-# Background styling
+# Animated gradient background
 st.markdown("""
 <style>
 
-.stApp {
-    background: linear-gradient(135deg,#e0f7fa,#fff3e0);
+body {
+    background: linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb,#a6c1ee,#a1c4fd,#c2e9fb);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
 }
 
-h1 {
-    text-align:center;
-    color:#1f4e79;
+@keyframes gradientBG {
+0% {background-position:0% 50%;}
+50% {background-position:100% 50%;}
+100% {background-position:0% 50%;}
 }
 
-.card {
-    background:white;
-    padding:25px;
-    border-radius:15px;
-    box-shadow:0px 6px 20px rgba(0,0,0,0.15);
-    margin-top:20px;
+.stApp{
+background: transparent;
+}
+
+.block-container{
+background: rgba(255,255,255,0.9);
+padding: 2rem;
+border-radius: 15px;
+box-shadow: 0px 8px 25px rgba(0,0,0,0.15);
+}
+
+h1{
+text-align:center;
+font-size:55px;
+color:#0b3d91;
+font-family:Trebuchet MS;
+}
+
+.subtitle{
+text-align:center;
+font-size:20px;
+color:#444;
+margin-bottom:30px;
+}
+
+.answer-box{
+background:white;
+padding:25px;
+border-radius:15px;
+box-shadow:0px 6px 20px rgba(0,0,0,0.2);
+font-size:18px;
 }
 
 </style>
@@ -38,44 +66,63 @@ h1 {
 
 # Header
 st.markdown("""
-<h1>🌍 AI Travel Concierge</h1>
-<p style='text-align:center;font-size:18px'>
-Your AI assistant for exploring travel guides ✈️
+<h1>✈️ TravelMate AI</h1>
+<p class="subtitle">
+Discover destinations • Explore food • Plan your journey 🌍
 </p>
 """, unsafe_allow_html=True)
 
+# Feature icons
+col1,col2,col3,col4 = st.columns(4)
+
+with col1:
+    st.markdown("### 🏝 Destinations")
+
+with col2:
+    st.markdown("### 🍜 Food")
+
+with col3:
+    st.markdown("### 🏨 Hotels")
+
+with col4:
+    st.markdown("### 🗺 Travel Guides")
+
 # Sidebar
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/201/201623.png", width=80)
+
+    st.image("https://cdn-icons-png.flaticon.com/512/201/201623.png", width=90)
+
     st.title("Travel AI")
-    st.write("Upload travel guides and ask questions from them.")
+
+    st.write("Your smart travel companion ✈️")
+
     st.markdown("---")
+
     st.write("✨ Features")
-    st.write("✔ PDF Travel Guides")
-    st.write("✔ AI Answers")
-    st.write("✔ RAG Retrieval")
 
-# Card container
-st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.write("✔ Upload travel guide PDFs")
 
+    st.write("✔ Ask travel questions")
+
+    st.write("✔ AI answers using RAG")
+
+    st.write("✔ Smart document search")
+
+# Inputs
 api_key = st.text_input("🔑 Enter Groq API Key", type="password")
 
-uploaded_file = st.file_uploader(
-    "📄 Upload Travel Guide PDF",
-    type="pdf"
-)
+uploaded_file = st.file_uploader("📄 Upload Travel Guide PDF", type="pdf")
 
 query = st.text_input("💬 Ask a travel question")
 
-st.markdown("</div>", unsafe_allow_html=True)
-
-# Main logic
+# RAG logic
 if uploaded_file and api_key and query:
 
     with open("temp.pdf","wb") as f:
         f.write(uploaded_file.read())
 
     loader = PyPDFLoader("temp.pdf")
+
     docs = loader.load()
 
     splitter = RecursiveCharacterTextSplitter(
@@ -105,7 +152,7 @@ if uploaded_file and api_key and query:
 
     response = llm.invoke(
         f"""
-        Use the context below to answer.
+        Use the context below to answer the travel question.
 
         Context:
         {context}
@@ -115,15 +162,11 @@ if uploaded_file and api_key and query:
         """
     )
 
-    st.markdown("### 🤖 AI Travel Assistant")
+    st.markdown("### Travel AI Answer")
 
     st.markdown(
         f"""
-        <div style="
-        background:white;
-        padding:20px;
-        border-radius:10px;
-        box-shadow:0px 4px 10px rgba(0,0,0,0.1)">
+        <div class="answer-box">
         {response.content}
         </div>
         """,
